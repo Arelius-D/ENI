@@ -1,0 +1,20 @@
+# Logs
+*.log
+logs/
+log/
+
+# Temporary Files
+*.tmp
+*.swp
+*.bak
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Backup Files
+/etc/eni_backup/
+
+# IDE/Editor Files
+.vscode/
+.idea/
