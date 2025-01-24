@@ -1,13 +1,28 @@
 # Easy Network Interface (ENI) - Project Instructions
 
 ## Project Overview
-The **Easy Network Interface (ENI)** is a user-friendly utility designed to manage and ensure your system uses the desired network interface. ENI is particularly useful for users with external NICs or those switching between built-in and external interfaces without modifying or overwriting system defaults. ENI is built to be **non-destructive**, **extensible**, and highly adaptable for various networking needs.
+The **Easy Network Interface (ENI)** is a robust utility designed to help users seamlessly manage their network interfaces. It ensures the correct interface is prioritized for outbound communication and provides essential tools to back up, restore, and configure network settings dynamically.
+
+ENI is particularly useful for systems with multiple NICs (e.g., external and built-in), allowing users to designate a primary interface while ensuring compatibility with existing system configurations. The tool is modular, extensible, and built with a non-destructive philosophy, making it suitable for all Linux users.
 
 ### Key Features:
-- **Define Primary Network Interface**: Users can select their desired primary network interface.
-- **Backup and Restore**: Provides tools to back up and restore default system network configurations.
-- **Non-Destructive Management**: Operates alongside system defaults without modifying or replacing existing configurations.
-- **Extensible Framework**: Modular design to accommodate future features like Wi-Fi management and fallback mechanisms.
+- **Service Creation for Primary Network Interface**:
+  - Automatically sets up a `systemd` service to enforce the selected primary interface.
+  - Ensures the correct network interface is consistently used on boot.
+- **Dependency Management**:
+  - Checks for required tools like `nmcli` and prompts users to install missing dependencies dynamically.
+- **Backup and Restore**:
+  - Provides tools to back up default network configurations and restore them when needed.
+- **Non-Destructive Management**:
+  - Operates alongside default system configurations without overwriting critical settings.
+- **Detailed Logs**:
+  - Logs all actions in a structured manner for troubleshooting and review.
+- **Error Handling**:
+  - Validates user input and ensures system services are managed safely without disruptions.
+- **User-Friendly Design**:
+  - Includes a simple text-based interface (TUI) for managing all operations.
+- **Extensible Framework**:
+  - Designed for future additions, such as Wi-Fi management and automated failover mechanisms.
 
 ---
 
@@ -15,9 +30,9 @@ The **Easy Network Interface (ENI)** is a user-friendly utility designed to mana
 To use ENI, ensure the following dependencies are installed on your system:
 
 1. **NetworkManager CLI (`nmcli`)**:
-   - Lightweight and powerful tool for managing network connections via the command line.
-   - Installed by default on most major Linux distributions.
-   - To install if missing:
+   - A lightweight tool for managing network connections.
+   - Installed by default on most Linux distributions.
+   - If missing, you can install it using:
      - **Debian/Ubuntu**: `sudo apt install network-manager`
      - **RHEL/CentOS/Fedora**: `sudo yum install NetworkManager`
      - **Arch/Manjaro**: `sudo pacman -S networkmanager`
@@ -35,25 +50,62 @@ To use ENI, ensure the following dependencies are installed on your system:
 ENI provides the following core functionalities:
 
 1. **Check Current Network Configuration**:
-   - Detects which service (e.g., `NetworkManager`, `systemd-networkd`, or others) manages the network.
-   - Displays the current status of services (e.g., `started`, `enabled`).
-   - Optionally logs this information in a backup directory.
+   - Detects and displays which network management service (e.g., `NetworkManager`, `systemd-networkd`) is active.
+   - Outputs interface statuses, including link state and IP addresses.
 
 2. **Backup System Defaults**:
-   - Captures the system’s default network configuration (active interfaces, service states, etc.).
-   - Saves a snapshot that users can later restore without altering system defaults.
+   - Saves the system’s current network configuration to a backup directory.
+   - Includes critical configuration files and service states for restoration.
 
 3. **Restore System Defaults**:
    - Restores the system’s network configuration from a previously saved backup.
-   - Prompts users for confirmation before applying changes.
+   - Prevents accidental overwrites by prompting for confirmation before applying changes.
 
 4. **Setup Easy Network Interface (ENI)**:
-   - Guides users to define and set up their primary network interface.
-   - Ensures that the configuration coexists with existing defaults.
+   - Allows users to select a primary network interface dynamically.
+   - Creates a `systemd` service (`easy.network.interface.service`) to enforce the configuration.
+   - Automatically disables conflicting services to ensure seamless operation.
 
 5. **Manage Configured Network Interface**:
-   - Allows users to monitor and manage the network interface configured via ENI.
-   - Displays details like link state, connection status, and more.
+   - Monitors and manages the selected primary network interface.
+   - Displays metrics such as link state, connection status, and speed.
+   - Ensures the user-defined configuration remains intact during runtime.
+
+6. **Service and Dependency Checks**:
+   - Verifies critical services (e.g., Docker) are restarted to ensure outbound connectivity.
+   - Provides clear prompts if any required dependencies are missing.
+
+---
+
+## How ENI Service Works
+### Service Creation (`easy.network.interface.service`):
+- ENI generates a custom `systemd` service file to prioritize the selected primary interface.
+- This service ensures that the designated interface is activated on boot and deactivates conflicting interfaces.
+- The service is automatically enabled and started during setup.
+
+Example Service File:
+```
+[Unit]
+Description=Manage Network Interface: <PRIMARY_INTERFACE>
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/nmcli device connect <PRIMARY_INTERFACE>
+ExecStop=/usr/bin/nmcli device disconnect <PRIMARY_INTERFACE>
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Dependency Validation:
+During setup, ENI ensures required dependencies like `nmcli` are installed. If missing, it provides platform-specific instructions to guide the user:
+
+- **Debian/Ubuntu**: `sudo apt install network-manager`
+- **RHEL/CentOS/Fedora**: `sudo yum install NetworkManager`
+- **Arch/Manjaro**: `sudo pacman -S networkmanager`
 
 ---
 
@@ -71,32 +123,50 @@ Easy Network Interface (ENI) - Main Menu
     (Rollback to the system's default state, if a backup exists)
 4 - Setup Easy Network Interface (ENI)
     (Define and configure your desired primary network interface)
-5 - Manage Configured Network Interface
-    (Manage the interface you’ve configured using ENI)
+5 - Establish The Easy Network Interface (ENI) Service
+    (Create and activate the ENI systemd service)
 0 - Exit
 ----------------------------------------
 ```
 
 ### Steps for Each Option:
 1. **Check Current Network Configuration**:
-   - Displays which service manages the network and its current state.
-   - Offers to create a backup of this configuration for later reference.
+   - Identifies and displays active network services and interfaces.
+   - Offers to log the configuration details for review.
 
 2. **Backup System Defaults**:
-   - Saves the current system configuration to a backup directory.
-   - Includes a detailed log file documenting the service state, active interfaces, and more.
+   - Creates a compressed archive of critical network configuration files.
+   - Saves the archive to the backup directory with a timestamp.
 
 3. **Restore System Defaults**:
-   - Compares the current configuration with the saved backup.
-   - Prompts the user for confirmation before applying changes.
+   - Locates the most recent backup and restores the configuration.
+   - Verifies integrity before applying changes.
 
 4. **Setup ENI**:
-   - Allows users to select their desired primary network interface.
-   - Validates the selection and applies it without altering system defaults.
+   - Prompts the user to select a primary interface (e.g., `eth0`, `eth1`).
+   - Validates the choice and updates internal configuration.
+   - Ensures no conflicting services are active.
 
-5. **Manage Configured Interface**:
-   - Provides tools to check the status, link, and other metrics of the configured interface.
-   - Ensures no changes are made to the system defaults during management.
+5. **Establish the ENI Service**:
+   - Automatically generates and enables the `easy.network.interface.service`.
+   - Stops conflicting services (e.g., Docker) temporarily to avoid disruptions.
+   - Restarts any critical outbound services to ensure connectivity.
+   - Provides feedback on the status of the service after setup.
+
+---
+
+## Logs
+All ENI operations are logged for transparency and troubleshooting. Logs are stored in the `logs/` directory, with filenames following the format:
+
+```
+logs/eni_<YYYYMMDD>_<HHMM>.log
+```
+
+### Examples of Logged Information:
+- Network services checked and their statuses.
+- User-selected primary interface.
+- Actions performed, such as stopping/starting services.
+- Errors encountered during operations.
 
 ---
 
@@ -129,3 +199,4 @@ ENI is designed to grow with user needs. Planned future features include:
    - Code must remain modular and future-proof to allow for seamless integration of new features.
 
 ---
+
