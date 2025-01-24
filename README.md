@@ -1,58 +1,65 @@
-# ENI
-Easy Network Interface (ENI) - The Non-Destructive Network Interface Manager You've Been Looking For!
-
-
-
-
 # Easy Network Interface (ENI) - Project Instructions
 
 ## Project Overview
-The **Easy Network Interface (ENI)** is designed to provide users with a user-friendly interface for managing and ensuring their system uses the desired network interface. This utility is particularly useful for users with external NICs or those looking to switch between built-in and external interfaces without modifying or overwriting system defaults. ENI is built to be **non-destructive** and **extensible**, enabling users to configure, manage, and restore network settings with ease.
+The **Easy Network Interface (ENI)** is a user-friendly utility designed to manage and ensure your system uses the desired network interface. ENI is particularly useful for users with external NICs or those switching between built-in and external interfaces without modifying or overwriting system defaults. ENI is built to be **non-destructive**, **extensible**, and highly adaptable for various networking needs.
 
 ### Key Features:
-- **Setup Primary Network Interface**: Users can define their desired primary network interface.
-- **Backup and Restore Defaults**: ENI ensures that users can back up and restore system configurations without altering default services like `NetworkManager` or `systemd-networkd`.
-- **Non-Destructive Management**: The utility does not modify or replace system defaults but instead works alongside existing configurations.
-- **Future-Proof Design**: The tool is modular, allowing future extensions for fallback mechanisms and full Wi-Fi support.
+- **Define Primary Network Interface**: Users can select their desired primary network interface.
+- **Backup and Restore**: Provides tools to back up and restore default system network configurations.
+- **Non-Destructive Management**: Operates alongside system defaults without modifying or replacing existing configurations.
+- **Extensible Framework**: Modular design to accommodate future features like Wi-Fi management and fallback mechanisms.
+
+---
+
+## Requirements
+To use ENI, ensure the following dependencies are installed on your system:
+
+1. **NetworkManager CLI (`nmcli`)**:
+   - Lightweight and powerful tool for managing network connections via the command line.
+   - Installed by default on most major Linux distributions.
+   - To install if missing:
+     - **Debian/Ubuntu**: `sudo apt install network-manager`
+     - **RHEL/CentOS/Fedora**: `sudo yum install NetworkManager`
+     - **Arch/Manjaro**: `sudo pacman -S networkmanager`
+
+2. **Bash Shell**:
+   - Requires a POSIX-compliant shell (Bash) to execute scripts.
+
+3. **Linux Utilities**:
+   - `systemctl`: For managing services.
+   - `tar`: For creating and restoring backups.
 
 ---
 
 ## Current Functionality
-ENI currently supports the following functionalities:
+ENI provides the following core functionalities:
 
 1. **Check Current Network Configuration**:
    - Detects which service (e.g., `NetworkManager`, `systemd-networkd`, or others) manages the network.
-   - Provides the current status of services (e.g., `started`, `enabled`, or both).
-   - Optionally allows users to back up this information in a detailed log file within a backup directory (`/etc/eni_backup`).
+   - Displays the current status of services (e.g., `started`, `enabled`).
+   - Optionally logs this information in a backup directory.
 
 2. **Backup System Defaults**:
-   - Captures the system’s default network configuration (service states, active interfaces, etc.).
-   - Creates a snapshot that users can later restore.
-   - Does not alter any service or configuration while taking the backup.
+   - Captures the system’s default network configuration (active interfaces, service states, etc.).
+   - Saves a snapshot that users can later restore without altering system defaults.
 
 3. **Restore System Defaults**:
-   - Compares the current configuration with the saved backup.
-   - Prompts users twice for confirmation before restoring any changes.
-   - Keeps the backup intact for future use.
+   - Restores the system’s network configuration from a previously saved backup.
+   - Prompts users for confirmation before applying changes.
 
 4. **Setup Easy Network Interface (ENI)**:
-   - Guides users through defining their desired primary network interface.
-   - Utilizes a non-destructive approach that coexists with system defaults.
+   - Guides users to define and set up their primary network interface.
+   - Ensures that the configuration coexists with existing defaults.
 
-5. **Manage Configured Interface**:
+5. **Manage Configured Network Interface**:
    - Allows users to monitor and manage the network interface configured via ENI.
-   - Provides simple tools for checking status, link, and other metrics.
-
-6. **Wi-Fi Detection (Foundation)**:
-   - Detects active Wi-Fi interfaces (e.g., `wlan0`).
-   - Notifies users that Wi-Fi fallback is not supported in the current version.
+   - Displays details like link state, connection status, and more.
 
 ---
 
-## Updated Instructions for TUI
-The text-based user interface (TUI) has been designed to be simple and intuitive. It supports the following options:
+## Usage
+ENI uses a text-based user interface (TUI) to guide users through its options. Upon launching, you will see:
 
-### Main Menu
 ```
 Easy Network Interface (ENI) - Main Menu
 ----------------------------------------
@@ -70,55 +77,55 @@ Easy Network Interface (ENI) - Main Menu
 ----------------------------------------
 ```
 
-### Detailed Steps for Each Option
+### Steps for Each Option:
 1. **Check Current Network Configuration**:
-   - Displays the service managing the network and its state.
-   - Offers to create a backup of this information.
-   - Logs the service’s state (e.g., `started` but not `enabled`) to ensure accurate system understanding.
+   - Displays which service manages the network and its current state.
+   - Offers to create a backup of this configuration for later reference.
 
 2. **Backup System Defaults**:
-   - Saves the current system configuration to `/etc/eni_backup`.
-   - Includes a detailed log file documenting service states, active interfaces, and other details.
+   - Saves the current system configuration to a backup directory.
+   - Includes a detailed log file documenting the service state, active interfaces, and more.
 
 3. **Restore System Defaults**:
-   - Compares the current configuration with the backup.
-   - Prompts the user twice before applying any restoration.
-   - Leaves the backup intact for future use.
+   - Compares the current configuration with the saved backup.
+   - Prompts the user for confirmation before applying changes.
 
 4. **Setup ENI**:
-   - Guides users to define and set up their desired primary network interface.
-   - Includes logic for validating the selected interface and ensuring non-destructive configuration.
+   - Allows users to select their desired primary network interface.
+   - Validates the selection and applies it without altering system defaults.
 
 5. **Manage Configured Interface**:
-   - Provides basic tools to check the status, link, and other metrics of the configured interface.
-   - Ensures no changes are made to system defaults during management.
+   - Provides tools to check the status, link, and other metrics of the configured interface.
+   - Ensures no changes are made to the system defaults during management.
 
 ---
 
 ## Future Enhancements
-1. **Wi-Fi Fallback Support**:
-   - Automate switching to a fallback interface (e.g., from Ethernet to Wi-Fi) if the primary interface loses its link.
+ENI is designed to grow with user needs. Planned future features include:
 
-2. **Full Wi-Fi Management**:
-   - Support for configuring and managing Wi-Fi NICs, including SSID and password settings.
+1. **Wi-Fi Management**:
+   - Full support for managing Wi-Fi interfaces, including SSID and password configuration.
+
+2. **Wi-Fi Fallback Support**:
+   - Automatic switching to a fallback interface (e.g., Wi-Fi) if the primary interface loses its link.
 
 3. **Periodic Status Checks**:
-   - Add periodic checks to monitor link status and switch interfaces as needed.
+   - Add periodic checks to monitor link status and automatically switch interfaces if needed.
 
-4. **Improved Logs and Analytics**:
-   - Provide more detailed analytics and logs for network configurations and statuses.
+4. **Detailed Logs and Analytics**:
+   - Provide comprehensive analytics and logging for network configurations and performance.
 
 ---
 
 ## Notes for Developers
 1. **Versioning**:
-   - Each code block must include its name, version, and a description of its functionality.
-   - Updates or alterations must clearly reference the code block name and version, specifying whether it’s a full update or a partial edit.
+   - All scripts and modules include version numbers for easy tracking.
+   - Updates must specify whether changes are partial or full.
 
 2. **Non-Destructive Nature**:
-   - Ensure no system default configurations or states are altered unless explicitly requested by the user (e.g., during restoration).
+   - Ensure no system defaults are altered unless explicitly requested by the user (e.g., during restoration).
 
 3. **Extensibility**:
-   - Design modular code that can easily integrate future features.
+   - Code must remain modular and future-proof to allow for seamless integration of new features.
 
 ---
